@@ -21,7 +21,7 @@ use hyper::mime::{Mime, Attr};
 use url::Url;
 
 use std::comm::{channel, Receiver, Sender};
-use std::str::Slice;
+use std::borrow::Cow;
 
 pub enum ControlMsg {
     /// Request the data associated with a particular URL
@@ -86,7 +86,8 @@ impl Metadata {
             content_type: None,
             charset:      None,
             headers: None,
-            status: Some(RawStatus(200, Slice("OK"))) // http://fetch.spec.whatwg.org/#concept-response-status-message
+            // http://fetch.spec.whatwg.org/#concept-response-status-message
+            status: Some(RawStatus(200, Cow::Borrowed("OK")))
         }
     }
 

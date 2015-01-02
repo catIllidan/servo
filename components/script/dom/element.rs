@@ -86,7 +86,7 @@ impl ElementDerived for EventTarget {
     }
 }
 
-#[deriving(PartialEq, Show)]
+#[deriving(Copy, PartialEq, Show)]
 #[jstraceable]
 pub enum ElementTypeId {
     HTMLElement(HTMLElementTypeId),
@@ -841,9 +841,9 @@ impl<'a> ElementMethods for JSRef<'a, Element> {
             Some(ref prefix) => {
                 (format!("{}:{}",
                          prefix.as_slice(),
-                         self.local_name.as_slice())).into_maybe_owned()
+                         self.local_name.as_slice())).into_cow()
             },
-            None => self.local_name.as_slice().into_maybe_owned()
+            None => self.local_name.as_slice().into_cow()
         };
         if self.html_element_in_html_document() {
             qualified_name.as_slice().to_ascii_upper()

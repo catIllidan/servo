@@ -63,7 +63,7 @@ use dom::bindings::codegen::UnionTypes::StringOrURLSearchParams;
 use dom::bindings::codegen::UnionTypes::StringOrURLSearchParams::{eString, eURLSearchParams};
 pub type SendParam = StringOrURLSearchParams;
 
-#[deriving(PartialEq)]
+#[deriving(PartialEq, Copy)]
 #[jstraceable]
 enum XMLHttpRequestState {
     Unsent = 0,
@@ -90,7 +90,7 @@ impl Runnable for XHRProgressHandler {
     }
 }
 
-#[deriving(PartialEq, Clone)]
+#[deriving(PartialEq, Clone, Copy)]
 #[jstraceable]
 pub struct GenerationId(uint);
 

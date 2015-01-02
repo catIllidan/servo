@@ -70,6 +70,8 @@ pub struct Temporary<T> {
     _js_ptr: *mut JSObject,
 }
 
+impl<T> Copy for Temporary<T> {}
+
 impl<T> PartialEq for Temporary<T> {
     fn eq(&self, other: &Temporary<T>) -> bool {
         self.inner == other.inner
@@ -92,10 +94,12 @@ impl<T: Reflectable> Temporary<T> {
 
     /// Create a stack-bounded root for this value.
     pub fn root(self) -> Root<T> {
-        let collection = StackRoots.get().unwrap();
-        unsafe {
-            Root::new(&**collection, &self.inner)
-        }
+        StackRoots.with(|ref collection| {
+            let RootCollectionPtr(collection) = collection.get().unwrap();
+            unsafe {
+                Root::new(&*collection, &self.inner)
+            }
+        })
     }
 
     unsafe fn inner(&self) -> JS<T> {
@@ -113,6 +117,8 @@ impl<T: Reflectable> Temporary<T> {
 pub struct JS<T> {
     ptr: *const T
 }
+
+impl<T> Copy for JS<T> {}
 
 impl<T> PartialEq for JS<T> {
     #[allow(unrooted_must_root)]
@@ -151,10 +157,12 @@ impl<T: Reflectable> JS<T> {
 
     /// Root this JS-owned value to prevent its collection as garbage.
     pub fn root(&self) -> Root<T> {
-        let collection = StackRoots.get().unwrap();
-        unsafe {
-            Root::new(&**collection, self)
-        }
+        StackRoots.with(|ref collection| {
+            let RootCollectionPtr(collection) = collection.get().unwrap();
+            unsafe {
+                Root::new(&*collection, self)
+            }
+        })
     }
 }
 
@@ -450,6 +458,10 @@ pub struct RootCollection {
     roots: UnsafeCell<SmallVec16<*mut JSObject>>,
 }
 
+pub struct RootCollectionPtr(pub *const RootCollection);
+
+impl Copy for RootCollectionPtr {}
+
 impl RootCollection {
     /// Create an empty collection of roots
     pub fn new() -> RootCollection {
@@ -547,6 +559,8 @@ pub struct JSRef<'a, T> {
     ptr: *const T,
     chain: ContravariantLifetime<'a>,
 }
+
+impl<'a, T> Copy for JSRef<'a, T> {}
 
 impl<'a, T> Clone for JSRef<'a, T> {
     fn clone(&self) -> JSRef<'a, T> {
